@@ -22,7 +22,8 @@ A full-stack team task management web app with **role-based access control** (Ad
 
 ## 🚀 Live demo
 
-**Live URL:** `https://YOUR-APP.up.railway.app` *(set after deploying — see below)*
+**Live URL:** https://frontend-production-7a0f.up.railway.app
+**API:** https://backend-production-c4f6.up.railway.app
 
 | Demo account | Password      | Role |
 |--------------|---------------|------|
