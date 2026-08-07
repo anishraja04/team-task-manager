@@ -1,0 +1,13 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "services": [
+    {
+      "name": "backend",
+      "rootDirectory": "backend"
+    },
+    {
+      "name": "frontend",
+      "rootDirectory": "frontend"
+    }
+  ]
+}
