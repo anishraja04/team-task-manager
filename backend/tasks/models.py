@@ -5,12 +5,14 @@ from django.utils import timezone
 
 
 class Task(models.Model):
+    # status of the task - from todo to done
     class Status(models.TextChoices):
         TODO = "todo", "To Do"
         IN_PROGRESS = "in_progress", "In Progress"
         REVIEW = "review", "In Review"
         DONE = "done", "Done"
 
+    # priority of the task
     class Priority(models.TextChoices):
         LOW = "low", "Low"
         MEDIUM = "medium", "Medium"
@@ -19,7 +21,9 @@ class Task(models.Model):
 
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    # every task belongs to one project
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE, related_name="tasks")
+    # the person who will do this task (can be empty)
     assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -27,6 +31,7 @@ class Task(models.Model):
         blank=True,
         related_name="assigned_tasks",
     )
+    # the person who created this task
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -40,6 +45,7 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        # new tasks should come first in the list
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -47,15 +53,18 @@ class Task(models.Model):
 
     @property
     def is_overdue(self):
+        # a task is overdue if the due date has passed and it is not done yet
         if self.due_date is None or self.status == self.Status.DONE:
             return False
         return self.due_date < timezone.localdate()
 
     def clean(self):
+        # while creating, due date should not be in the past
         if self.due_date and self.due_date < timezone.localdate() and not self.pk:
             raise ValidationError({"due_date": "Due date cannot be in the past."})
 
     def save(self, *args, **kwargs):
+        # when a task becomes done, we store the completed time automatically
         if self.status == self.Status.DONE and not self.completed_at:
             self.completed_at = timezone.now()
         if self.status != self.Status.DONE:
@@ -64,6 +73,7 @@ class Task(models.Model):
 
 
 class Comment(models.Model):
+    # comments are attached to a single task
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="task_comments")
     body = models.TextField()

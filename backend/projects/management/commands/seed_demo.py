@@ -11,108 +11,147 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Seed demo users, projects and tasks."
+    help = "This will fill the database with some demo users, projects and tasks so the app does not look empty."
 
     def handle(self, *args, **options):
-        admin, _ = User.objects.get_or_create(
+        # remove the old english demo users (from earlier version) so nothing looks fake
+        User.objects.filter(
+            email__in=["alice@example.com", "bob@example.com", "carol@example.com"]
+        ).delete()
+        Project.objects.filter(
+            name__in=["Website Redesign", "Mobile App v2", "Data Migration"]
+        ).delete()
+
+        # ---------- create the users first ----------
+        admin_user, _ = User.objects.get_or_create(
             email="admin@example.com",
-            defaults={"username": "admin", "name": "Platform Admin", "role": User.Role.ADMIN},
+            defaults={"username": "admin", "name": "Admin Sir", "role": User.Role.ADMIN},
         )
-        admin.set_password("admin12345")
-        admin.role = User.Role.ADMIN
-        admin.save()
+        admin_user.set_password("admin12345")
+        admin_user.role = User.Role.ADMIN
+        admin_user.save()
 
-        alice, _ = User.objects.get_or_create(
-            email="alice@example.com",
-            defaults={"username": "alice", "name": "Alice Johnson", "role": User.Role.MEMBER},
+        # rohan is a final year student who made this project
+        rohan, _ = User.objects.get_or_create(
+            email="rohan@example.com",
+            defaults={"username": "rohan", "name": "Rohan Sharma", "role": User.Role.MEMBER},
         )
-        alice.set_password("password123")
-        alice.save()
+        rohan.set_password("password123")
+        rohan.save()
 
-        bob, _ = User.objects.get_or_create(
-            email="bob@example.com",
-            defaults={"username": "bob", "name": "Bob Smith", "role": User.Role.MEMBER},
+        priya, _ = User.objects.get_or_create(
+            email="priya@example.com",
+            defaults={"username": "priya", "name": "Priya Patel", "role": User.Role.MEMBER},
         )
-        bob.set_password("password123")
-        bob.save()
+        priya.set_password("password123")
+        priya.save()
 
-        carol, _ = User.objects.get_or_create(
-            email="carol@example.com",
-            defaults={"username": "carol", "name": "Carol Davis", "role": User.Role.MEMBER},
+        arjun, _ = User.objects.get_or_create(
+            email="arjun@example.com",
+            defaults={"username": "arjun", "name": "Arjun Verma", "role": User.Role.MEMBER},
         )
-        carol.set_password("password123")
-        carol.save()
+        arjun.set_password("password123")
+        arjun.save()
 
+        ananya, _ = User.objects.get_or_create(
+            email="ananya@example.com",
+            defaults={"username": "ananya", "name": "Ananya Iyer", "role": User.Role.MEMBER},
+        )
+        ananya.set_password("password123")
+        ananya.save()
+
+        # ---------- now the projects (college / lab type projects) ----------
         project_data = [
             {
-                "name": "Website Redesign",
-                "description": "Revamp the marketing website with a modern look.",
-                "owner": alice,
-                "members": [bob, carol],
+                "name": "Hindi LLM Model Training",
+                "description": "Final year project - training a small language model on Hindi wikipedia data.",
+                "owner": rohan,
+                "members": [priya, arjun],
                 "tasks": [
-                    ("Design new landing page", "high", bob),
-                    ("Build component library", "medium", carol),
-                    ("Migrate content", "low", None),
-                    ("QA pass on responsive layout", "urgent", bob),
+                    ("Collect Hindi wikipedia data", "high", priya),
+                    ("Clean the dataset (remove null rows)", "high", None),
+                    ("Train tokenizer on hindi corpus", "medium", arjun),
+                    ("Run fine-tuning on GPU", "urgent", rohan),
+                    ("Evaluate model with perplexity", "medium", priya),
                 ],
             },
             {
-                "name": "Mobile App v2",
-                "description": "Second major release of the mobile application.",
-                "owner": bob,
-                "members": [alice],
+                "name": "UPI Fraud Detection ML Model",
+                "description": "Mini project to detect fraudulent UPI transactions using logistic regression.",
+                "owner": priya,
+                "members": [ananya],
                 "tasks": [
-                    ("Implement offline sync", "urgent", alice),
-                    ("Update push notifications", "medium", None),
-                    ("Performance profiling", "high", bob),
+                    ("Download bank transaction dataset", "medium", ananya),
+                    ("Handle missing values in data", "high", priya),
+                    ("Train the model on 80% data", "high", None),
+                    ("Test accuracy on remaining 20%", "medium", ananya),
                 ],
             },
             {
-                "name": "Data Migration",
-                "description": "Move legacy customer data to the new warehouse.",
-                "owner": carol,
-                "members": [alice, bob],
+                "name": "College Website Backend",
+                "description": "Django backend for our college department website (placements info).",
+                "owner": arjun,
+                "members": [rohan, ananya],
                 "tasks": [
-                    ("Write ETL scripts", "high", alice),
-                    ("Validate transformed records", "medium", bob),
-                    ("Schedule nightly job", "low", None),
+                    ("Create student model", "high", rohan),
+                    ("Add API for notice board", "medium", ananya),
+                    ("Fix the login bug", "urgent", None),
+                    ("Deploy on college server", "low", arjun),
                 ],
             },
         ]
 
-        statuses = [Task.Status.TODO, Task.Status.IN_PROGRESS, Task.Status.REVIEW, Task.Status.DONE]
-        for proj in project_data:
-            project, _ = Project.objects.get_or_create(
-                name=proj["name"],
-                defaults={"description": proj["description"], "owner": proj["owner"]},
+        # some random status so the dashboard looks real
+        all_status = [
+            Task.Status.TODO,
+            Task.Status.IN_PROGRESS,
+            Task.Status.REVIEW,
+            Task.Status.DONE,
+        ]
+
+        for one_project in project_data:
+            project, created = Project.objects.get_or_create(
+                name=one_project["name"],
+                defaults={
+                    "description": one_project["description"],
+                    "owner": one_project["owner"],
+                },
             )
+
+            # the owner is automatically admin
             Membership.objects.get_or_create(
-                project=project, user=project.owner, defaults={"role": Membership.Role.ADMIN}
+                project=project,
+                user=project.owner,
+                defaults={"role": Membership.Role.ADMIN},
             )
-            for member in proj["members"]:
+
+            # add other members
+            for member in one_project["members"]:
                 Membership.objects.get_or_create(
                     project=project,
                     user=member,
                     defaults={"role": Membership.Role.MEMBER},
                 )
-            for title, priority, assignee in proj["tasks"]:
-                task, created = Task.objects.get_or_create(
+
+            # create the tasks
+            for title, priority, assignee in one_project["tasks"]:
+                task, task_created = Task.objects.get_or_create(
                     project=project,
                     title=title,
                     defaults={
-                        "description": f"Demo task: {title}",
+                        "description": "Small task for this project",
                         "priority": priority,
                         "assignee": assignee,
                         "created_by": project.owner,
-                        "status": random.choice(statuses),
+                        "status": random.choice(all_status),
+                        # some tasks are already overdue to test the overdue feature
                         "due_date": date.today() + timedelta(days=random.randint(-3, 14)),
                     },
                 )
-                if not created and task.status == Task.Status.DONE:
-                    task.save()
 
-        self.stdout.write(self.style.SUCCESS("Seed complete. Login users:"))
-        self.stdout.write("  admin@example.com / admin12345  (platform admin)")
-        self.stdout.write("  alice@example.com / password123")
-        self.stdout.write("  bob@example.com   / password123")
-        self.stdout.write("  carol@example.com / password123")
+        self.stdout.write(self.style.SUCCESS("Demo data added successfully! Login users:"))
+        self.stdout.write("  admin@example.com   / admin12345")
+        self.stdout.write("  rohan@example.com   / password123")
+        self.stdout.write("  priya@example.com   / password123")
+        self.stdout.write("  arjun@example.com   / password123")
+        self.stdout.write("  ananya@example.com  / password123")

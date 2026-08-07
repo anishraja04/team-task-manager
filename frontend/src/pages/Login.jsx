@@ -28,7 +28,7 @@ export default function Login() {
     <div className="auth-wrap">
       <div className="auth-card">
         <h1>Welcome back</h1>
-        <p className="sub">Sign in to your TaskFlow account</p>
+        <p className="sub">Sign in to your KaamSathi account</p>
         {error && <div className="error-box">{error}</div>}
         <form onSubmit={onSubmit}>
           <div className="field">

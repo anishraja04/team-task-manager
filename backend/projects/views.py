@@ -15,6 +15,7 @@ class ProjectListCreateView(generics.ListCreateAPIView):
     serializer_class = ProjectSerializer
 
     def get_queryset(self):
+        # a normal user should only see the projects where he is owner or member
         user = self.request.user
         if user.is_platform_admin:
             return Project.objects.all()
@@ -40,6 +41,7 @@ class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def check_object_permissions(self, request, obj):
         super().check_object_permissions(request, obj)
+        # only admins can edit/delete the project, members can only view it
         if request.method in ("PUT", "PATCH", "DELETE") and not obj.is_admin(request.user):
             raise PermissionDenied("Only project admins can modify or delete this project.")
 
@@ -73,6 +75,7 @@ class ProjectMembersView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         project = self.get_project()
+        # check again manually because DRF does not call object permission on POST
         if not project.is_admin(request.user):
             raise PermissionDenied("Only project admins can manage team members.")
         return super().create(request, *args, **kwargs)
@@ -89,6 +92,7 @@ class ProjectMemberDetailView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         membership = self.get_object()
         project = membership.project
+        # the owner cannot remove himself, otherwise the project will have no admin
         if project.owner_id == membership.user_id:
             return Response(
                 {"detail": "The project owner cannot be removed."},

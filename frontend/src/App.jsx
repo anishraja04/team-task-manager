@@ -8,6 +8,7 @@ import Projects from './pages/Projects.jsx'
 import ProjectDetail from './pages/ProjectDetail.jsx'
 import Tasks from './pages/Tasks.jsx'
 
+// this route can only be opened when the user is logged in
 function Protected({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="loading">Loading…</div>
@@ -15,6 +16,7 @@ function Protected({ children }) {
   return children
 }
 
+// this route is only for non logged in users (like login/register page)
 function PublicOnly({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="loading">Loading…</div>

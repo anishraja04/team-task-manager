@@ -1,9 +1,11 @@
 import axios from 'axios'
 
+// create one axios instance so that all the api calls use the same base url
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
 })
 
+// add the jwt token in every request header
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access')
   if (token) {
@@ -12,6 +14,7 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// if the token expires, automatically try to refresh it using the refresh token
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -29,6 +32,7 @@ api.interceptors.response.use(
           original.headers.Authorization = `Bearer ${data.access}`
           return api(original)
         } catch {
+          // if refresh also fails then logout the user
           localStorage.clear()
           window.location.href = '/login'
         }

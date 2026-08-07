@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { tasksApi } from '../api'
 
+// map the status code with a nice label to show on the page
 const STATUS_LABELS = {
   todo: 'To Do',
   in_progress: 'In Progress',
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null)
   const [recent, setRecent] = useState([])
 
+  // load the dashboard numbers and the recent tasks when the page opens
   useEffect(() => {
     tasksApi.dashboard().then(({ data }) => setStats(data))
     tasksApi.list().then(({ data }) => {
@@ -28,6 +30,7 @@ export default function Dashboard() {
   return (
     <div>
       <h1 className="section-title">Dashboard</h1>
+      {/* these boxes show the overall counts of tasks */}
       <div className="stats">
         <div className="stat primary"><div className="num">{stats.total_tasks}</div><div className="label">Total tasks</div></div>
         <div className="stat"><div className="num">{stats.todo}</div><div className="label">To do</div></div>
@@ -59,6 +62,7 @@ export default function Dashboard() {
                   <td><span className={`badge priority-${t.priority}`}>{t.priority}</span></td>
                   <td>
                     {t.due_date ? (
+                      // highlight in red if the task is overdue
                       <span className={t.is_overdue ? 'badge overdue' : ''}>{t.due_date}</span>
                     ) : '—'}
                   </td>

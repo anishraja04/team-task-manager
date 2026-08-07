@@ -18,6 +18,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    # these extra fields are for showing full details on the frontend
     assignee_detail = UserSerializer(source="assignee", read_only=True)
     created_by = UserSerializer(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
@@ -47,6 +48,7 @@ class TaskSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_by", "completed_at", "created_at", "updated_at"]
 
     def validate_assignee(self, value):
+        # checking that we only assign the task to someone who is in the project
         project = self.instance.project if self.instance else self.context.get("project")
         if project is None:
             raise serializers.ValidationError("This task must belong to a project.")
@@ -55,11 +57,13 @@ class TaskSerializer(serializers.ModelSerializer):
         return value
 
     def validate_project(self, value):
+        # user should not create task in some project where he is not a member
         user = self.context["request"].user
         if not value.is_member(user):
             raise serializers.ValidationError("You are not a member of this project.")
         return value
 
     def create(self, validated_data):
+        # set the creator as the current logged in user
         validated_data["created_by"] = self.context["request"].user
         return super().create(validated_data)

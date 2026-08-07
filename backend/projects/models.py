@@ -3,7 +3,11 @@ from django.db import models
 
 
 class Membership(models.Model):
-    """Role of a user inside a project (Admin/Member)."""
+    """
+    Tells us which role a user has inside a project.
+    A user can be admin or member in one project and
+    something else in another project, that is why this is a separate model.
+    """
 
     class Role(models.TextChoices):
         ADMIN = "admin", "Admin"
@@ -15,6 +19,7 @@ class Membership(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        # one user can be added only once in one project
         unique_together = ("project", "user")
 
     def __str__(self):
@@ -24,6 +29,7 @@ class Membership(models.Model):
 class Project(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    # the person who created the project becomes the owner
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -41,6 +47,7 @@ class Project(models.Model):
         return self.name
 
     def is_admin(self, user):
+        # platform admin is always treated as admin
         membership = self.memberships.filter(user=user).first()
         return (
             membership.role == Membership.Role.ADMIN

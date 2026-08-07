@@ -11,15 +11,22 @@ User = get_user_model()
 
 
 class RegisterView(generics.CreateAPIView):
+    """
+    This view is used when a new person signs up on the website.
+    After saving the user we also generate the jwt tokens and return it
+    so that the frontend can directly use it without logging in again.
+    """
     queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
+        # first validate the data, if something wrong it will raise error
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
+        # sending the user + tokens back to the frontend
         return Response(
             {
                 "user": UserSerializer(user).data,
@@ -38,6 +45,7 @@ class LoginView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"].lower()
         password = serializer.validated_data["password"]
+        # checking if the user exists and the password is correct
         user = User.objects.filter(email__iexact=email).first()
         if user is None or not user.check_password(password):
             return Response(
@@ -63,10 +71,16 @@ class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        # returns the details of the currently logged in user
         return Response(UserSerializer(request.user).data)
 
 
 class UserSearchView(generics.ListAPIView):
+    """
+    Used when admin wants to add a member to the project.
+    We show a search box on the frontend and this api returns
+    the matching users by name / email / username.
+    """
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 

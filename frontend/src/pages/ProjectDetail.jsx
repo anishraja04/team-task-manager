@@ -4,6 +4,7 @@ import { authApi, projectsApi, tasksApi } from '../api'
 import TaskFormModal from '../components/TaskFormModal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 
+// labels for the task status dropdown
 const STATUS_LABELS = { todo: 'To Do', in_progress: 'In Progress', review: 'In Review', done: 'Done' }
 
 export default function ProjectDetail() {
@@ -20,6 +21,7 @@ export default function ProjectDetail() {
   const [memberRole, setMemberRole] = useState('member')
   const [error, setError] = useState('')
 
+  // load the project details and its tasks together
   const load = () => {
     projectsApi.get(id).then(({ data }) => setProject(data))
     tasksApi.list({ project: id }).then(({ data }) => setTasks(data.results ?? data))
@@ -29,8 +31,10 @@ export default function ProjectDetail() {
 
   if (!project) return <div className="loading">Loading project…</div>
 
+  // check if the current user is an admin of this project
   const amAdmin = project.owner?.id === user?.id || project.members?.some((m) => m.user?.id === user?.id && m.role === 'admin')
 
+  // search registered users when the admin types in the search box
   const searchUsers = async (q) => {
     setMemberQuery(q)
     if (!q.trim()) {
@@ -96,6 +100,7 @@ export default function ProjectDetail() {
         <button className="btn btn-outline" onClick={() => navigate('/projects')}>← Back</button>
       </div>
 
+      {/* small stats of this project */}
       <div className="stats">
         <div className="stat primary"><div className="num">{project.task_count}</div><div className="label">Total tasks</div></div>
         <div className="stat done"><div className="num">{project.completed_tasks}</div><div className="label">Completed</div></div>
@@ -103,6 +108,7 @@ export default function ProjectDetail() {
         <div className="stat"><div className="num">{project.members?.length}</div><div className="label">Members</div></div>
       </div>
 
+      {/* team section - only admin can add/remove members */}
       <div className="toolbar">
         <h2 className="section-title" style={{ marginBottom: 0 }}>Team</h2>
         {amAdmin && <button className="btn btn-outline btn-sm" onClick={() => setShowMemberModal(true)}>+ Add member</button>}
@@ -137,6 +143,7 @@ export default function ProjectDetail() {
         )}
       </div>
 
+      {/* tasks of this project */}
       <div className="toolbar">
         <h2 className="section-title" style={{ marginBottom: 0 }}>Tasks</h2>
         {amAdmin && <button className="btn btn-primary btn-sm" onClick={() => setShowTaskModal(true)}>+ New task</button>}
@@ -177,6 +184,7 @@ export default function ProjectDetail() {
         )}
       </div>
 
+      {/* popup for creating/editing a task in this project */}
       {showTaskModal && (
         <TaskFormModal
           projects={[project]}
@@ -186,6 +194,7 @@ export default function ProjectDetail() {
         />
       )}
 
+      {/* popup for adding a new team member */}
       {showMemberModal && (
         <div className="modal-backdrop" onClick={() => setShowMemberModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>

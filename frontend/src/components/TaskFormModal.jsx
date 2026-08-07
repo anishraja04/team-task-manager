@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { tasksApi } from '../api'
 
+// all the options for status and priority
 const STATUSES = ['todo', 'in_progress', 'review', 'done']
 const PRIORITIES = ['low', 'medium', 'high', 'urgent']
 
 export default function TaskFormModal({ projects = [], members = [], task, onClose, onSaved }) {
+  // if we are editing a task then prefill the form with its values
   const [form, setForm] = useState({
     title: task?.title || '',
     description: task?.description || '',
-    project: task?.project || projectId || '',
+    project: task?.project || projects[0]?.id || '',
     assignee: task?.assignee || '',
     status: task?.status || 'todo',
     priority: task?.priority || 'medium',
@@ -17,8 +19,10 @@ export default function TaskFormModal({ projects = [], members = [], task, onClo
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
+  // small helper to update one field of the form
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
+  // if projects list is empty (like from project detail page) keep the current one
   const projectOptions = projects.length ? projects : [{ id: form.project, name: form.project_name }]
 
   const submit = async (e) => {
@@ -34,6 +38,7 @@ export default function TaskFormModal({ projects = [], members = [], task, onClo
       onSaved()
     } catch (err) {
       const d = err.response?.data
+      // show the field errors from the backend if any
       setError(
         d
           ? Object.entries(d).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join('; ')

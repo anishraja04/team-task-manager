@@ -1,12 +1,14 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import api from '../api/client'
 
+// this context keeps the login state of the whole app in one place
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // when the page loads, check if the user is already logged in
   useEffect(() => {
     const token = localStorage.getItem('access')
     if (!token) {
@@ -22,6 +24,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const { data } = await api.post('/auth/login/', { email, password })
+    // save both tokens in the browser storage
     localStorage.setItem('access', data.access)
     localStorage.setItem('refresh', data.refresh)
     setUser(data.user)

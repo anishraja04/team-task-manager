@@ -1,6 +1,6 @@
 <div align="center">
 
-# TaskFlow — Team Task Manager
+# KaamSathi — Team Task Manager
 
 A full-stack team task management application with role-based access control.
 
@@ -14,7 +14,7 @@ A full-stack team task management application with role-based access control.
 
 ## Overview
 
-TaskFlow helps teams organize work into **projects**, assign **tasks**, and track progress through a live dashboard. Access is controlled by **role-based permissions** (Admin / Member) at both the platform and project level, ensuring that only authorized users can create, edit, or assign work.
+KaamSathi (Hindi: काम साथी, "work partner") helps teams organize work into **projects**, assign **tasks**, and track progress through a live dashboard. Access is controlled by **role-based permissions** (Admin / Member) at both the platform and project level, ensuring that only authorized users can create, edit, or assign work. The demo data is seeded with Indian team members and real-world style projects like **Hindi LLM Model Training** and **UPI Fraud Detection ML Model**.
 
 The application is a classic three-tier architecture:
 
@@ -71,9 +71,10 @@ Sign in with any of the accounts below (seeded automatically on deploy):
 | Email | Password | Role |
 |-------|----------|------|
 | `admin@example.com` | `admin12345` | Platform Admin |
-| `alice@example.com` | `password123` | Project Admin |
-| `bob@example.com` | `password123` | Member |
-| `carol@example.com` | `password123` | Member |
+| `rohan@example.com` | `password123` | Project Admin |
+| `priya@example.com` | `password123` | Member |
+| `arjun@example.com` | `password123` | Member |
+| `ananya@example.com` | `password123` | Member |
 
 You can also register a new account from the sign-up page.
 

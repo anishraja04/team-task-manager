@@ -14,6 +14,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
+        # show only tasks from projects where the user is a member
         user = self.request.user
         project_id = self.request.query_params.get("project")
         base = (
@@ -33,6 +34,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         project = serializer.validated_data.get("project")
+        # only the project admin is allowed to create tasks
         if project and not project.is_admin(self.request.user):
             raise PermissionDenied("Only project admins can create tasks.")
         serializer.save()
@@ -89,6 +91,7 @@ class TaskCommentView(generics.ListCreateAPIView):
         return task.comments.all()
 
     def get_task(self):
+        # only members of the project can see or add comments
         user = self.request.user
         task = (
             Task.objects.filter(project__owner=user)
@@ -104,6 +107,10 @@ class TaskCommentView(generics.ListCreateAPIView):
 
 
 class DashboardView(generics.GenericAPIView):
+    """
+    Gives all the numbers that are shown on the main dashboard page.
+    We count tasks in every status and also the overdue ones.
+    """
     serializer_class = TaskSerializer
 
     def get(self, request):

@@ -3,6 +3,7 @@ import { projectsApi, tasksApi } from '../api'
 import TaskFormModal from '../components/TaskFormModal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 
+// labels for the task status dropdown
 const STATUS_LABELS = { todo: 'To Do', in_progress: 'In Progress', review: 'In Review', done: 'Done' }
 
 export default function Tasks() {
@@ -13,18 +14,21 @@ export default function Tasks() {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState(null)
 
+  // fetch the tasks from the server (optionally by project)
   const loadTasks = () => {
     const params = {}
     if (filter.project) params.project = filter.project
     tasksApi.list(params).then(({ data }) => setTasks(data.results ?? data))
   }
 
+  // load the project list once when the page opens
   useEffect(() => {
     projectsApi.list().then(({ data }) => setProjects(data.results ?? data))
   }, [])
 
   useEffect(loadTasks, [filter.project])
 
+  // filter the tasks based on the dropdowns selected above
   const filtered = tasks.filter((t) => {
     if (filter.status && t.status !== filter.status) return false
     if (filter.assignee === 'mine' && t.assignee !== user?.id) return false
@@ -32,6 +36,7 @@ export default function Tasks() {
     return true
   })
 
+  // change the status of a task from the dropdown
   const updateStatus = async (task, status) => {
     try {
       await tasksApi.update(task.id, { status })
@@ -47,6 +52,7 @@ export default function Tasks() {
     loadTasks()
   }
 
+  // to show the correct member list when editing a task
   const memberByProject = (projectId) =>
     projects.find((p) => p.id === projectId)?.members || []
 
@@ -57,6 +63,7 @@ export default function Tasks() {
         <button className="btn btn-primary" onClick={() => { setEditing(null); setShowModal(true) }}>+ New Task</button>
       </div>
 
+      {/* filters on top of the task table */}
       <div className="toolbar">
         <div className="field">
           <label>Project</label>
@@ -118,6 +125,7 @@ export default function Tasks() {
         )}
       </div>
 
+      {/* open the create/edit modal */}
       {showModal && (
         <TaskFormModal
           projects={projects}

@@ -10,7 +10,7 @@ export default function Layout() {
     <div className="layout">
       <aside className="sidebar">
         <div className="brand">
-          <span className="logo">✓</span> TaskFlow
+          <span className="logo">✓</span> KaamSathi
         </div>
         <nav className="nav">
           <NavLink to="/" end className={navLink}>Dashboard</NavLink>

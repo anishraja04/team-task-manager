@@ -9,6 +9,7 @@ export default function Projects() {
   const [form, setForm] = useState({ name: '', description: '' })
   const [error, setError] = useState('')
 
+  // get all the projects of the logged in user
   const load = () => {
     setLoading(true)
     projectsApi.list().then(({ data }) => setProjects(data.results ?? data)).finally(() => setLoading(false))
@@ -16,6 +17,7 @@ export default function Projects() {
 
   useEffect(load, [])
 
+  // create a new project and add it to the list
   const create = async (e) => {
     e.preventDefault()
     setError('')
@@ -64,6 +66,7 @@ export default function Projects() {
         </div>
       )}
 
+      {/* popup for creating a new project */}
       {showModal && (
         <div className="modal-backdrop" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>

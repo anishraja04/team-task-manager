@@ -20,6 +20,7 @@ export default function Register() {
       navigate('/')
     } catch (err) {
       const d = err.response?.data
+      // show the field errors returned by the backend
       const msg = d
         ? Object.entries(d)
             .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
